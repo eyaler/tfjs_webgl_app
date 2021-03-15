@@ -273,6 +273,7 @@ function on_drop (event)
 /* ---------------------------------------------------------------- *
  *      M A I N    F U N C T I O N
  * ---------------------------------------------------------------- */
+let have_video = false;
 function startWebGL()
 {
     s_debug_log = document.getElementById('debug_log');
@@ -414,6 +415,7 @@ function startWebGL()
         let texid = imgtex.texid;
         if (GLUtil.is_camera_ready(camtex))
         {
+            have_video = true;
             GLUtil.update_camera_texture (gl, camtex);
             src_w = camtex.video.videoWidth;
             src_h = camtex.video.videoHeight;
@@ -435,11 +437,9 @@ function startWebGL()
             num_repeat = mask_updated ? 2 : 1;
             for (let i = 0; i < num_repeat; i ++) /* repeat 5 times to flush pipeline ? */
             {
-                if (GLUtil.is_camera_ready(camtex)) {
+                if (GLUtil.is_camera_ready(camtex))
                     face_predictions = await facemesh_model.estimateFaces ({input: camtex.video});
-                    imgtex.ready = false;
-                }
-                else
+                else if (!have_video)
                     face_predictions = await facemesh_model.estimateFaces ({input: imgtex.image});
             }
             time_invoke0 = performance.now() - time_invoke1_start;
