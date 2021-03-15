@@ -202,8 +202,7 @@ function render_progress_bar (gl, current_phase, face_predictions, win_w, win_h)
     x = win_w * 0.5 - 100;
     y = win_h * 0.5 - 11;
     let str = " show me your face ";
-    if (s_gui_prop.overlay_stats)
-        dbgstr.draw_dbgstr_ex (gl, str, x, y, 1, [0.0, 1.0, 1.0, 1.0], [0.2, 0.2, 0.2, 1.0]);
+    //dbgstr.draw_dbgstr_ex (gl, str, x, y, 1, [0.0, 1.0, 1.0, 1.0], [0.2, 0.2, 0.2, 1.0]);
 }
 
 
