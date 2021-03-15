@@ -11,10 +11,11 @@ let s_drop_files = [];
 class GuiProperty {
     constructor() {
         this.srcimg_scale = 1.0;
-        this.mask_alpha   = 0.7;
-        this.flip_horizontal = true;
+        this.mask_alpha   = 1.0;
+        this.flip_horizontal = false;
         this.mask_eye_hole = false;
         this.draw_pmeter = false;
+        this.overlay_stats = false;
     }
 }
 const s_gui_prop = new GuiProperty();
@@ -140,7 +141,7 @@ render_2d_scene (gl, texid, face_predictions, tex_w, tex_h,
     }
 
     /* render 2D mask image */
-    if (mask_predictions.length > 0)
+    if (mask_predictions.length > 0  && s_gui_prop.overlay_stats)
     {
         let texid = masktex.texid;
         let tx = 5;
@@ -242,6 +243,7 @@ init_gui ()
     gui.add (s_gui_prop, 'flip_horizontal');
     gui.add (s_gui_prop, 'mask_eye_hole');
     gui.add (s_gui_prop, 'draw_pmeter');
+    gui.add (s_gui_prop, 'overlay_stats');
 }
 
 
@@ -293,7 +295,7 @@ function startWebGL()
 
     init_gui ();
 
-    const camtex = GLUtil.create_camera_texture (gl);
+    let camtex = GLUtil.create_camera_texture (gl);
     //const camtex = GLUtil.create_video_texture (gl, "./assets/just_do_it.mp4");
     const imgtex = GLUtil.create_image_texture2 (gl, "pakutaso_sotsugyou.jpg");
 
@@ -313,6 +315,11 @@ function startWebGL()
     pmeter.init_pmeter (gl, win_w, win_h, win_h - 40);
     const stats = init_stats ();
 
+    document.getElementById("video").onchange = function(e) {
+        const reader = new FileReader();
+        reader.onload = function(e) { camtex = GLUtil.create_video_texture(gl, e.target.result);}
+        reader.readAsDataURL(e.target.files[0]);
+    };
 
     /* --------------------------------- *
      *  load FACEMESH
@@ -428,8 +435,10 @@ function startWebGL()
             num_repeat = mask_updated ? 2 : 1;
             for (let i = 0; i < num_repeat; i ++) /* repeat 5 times to flush pipeline ? */
             {
-                if (GLUtil.is_camera_ready(camtex))
+                if (GLUtil.is_camera_ready(camtex)) {
                     face_predictions = await facemesh_model.estimateFaces ({input: camtex.video});
+                    imgtex.ready = false;
+                }
                 else
                     face_predictions = await facemesh_model.estimateFaces ({input: imgtex.image});
             }
@@ -452,12 +461,14 @@ function startWebGL()
             pmeter.draw_pmeter (gl, 0, 40);
         }
 
-        let str = "Interval: " + interval_ms.toFixed(1) + " [ms]";
-        dbgstr.draw_dbgstr (gl, str, 10, 10);
+        if (s_gui_prop.overlay_stats)
+        {
+            let str = "Interval: " + interval_ms.toFixed(1) + " [ms]";
+            dbgstr.draw_dbgstr (gl, str, 10, 10);
 
-        str = "TF.js0  : " + time_invoke0.toFixed(1)  + " [ms]";
-        dbgstr.draw_dbgstr (gl, str, 10, 10 + 22 * 1);
-
+            str = "TF.js0  : " + time_invoke0.toFixed(1)  + " [ms]";
+            dbgstr.draw_dbgstr (gl, str, 10, 10 + 22 * 1);
+        }
         stats.end();
         requestAnimationFrame (render);
     }

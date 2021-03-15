@@ -34,8 +34,11 @@
   ------------------------------------------------------------------>
 <body onload="startWebGL();">
 
-    <h1>FaceSwap</h1>
-
+    <h1><label for="video">FaceSwap for Video:</label>
+    <input type="file"
+           id="video" name="video" value=""
+           accept="video/*">
+    </h1>
     <div id="loading">
       <div class="spinner"></div>
     </div>

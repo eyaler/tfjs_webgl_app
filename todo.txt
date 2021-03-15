@@ -1,0 +1,3 @@
+allow download video
+make sure video is full resolution
+video element not loaded error

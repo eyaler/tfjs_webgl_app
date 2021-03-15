@@ -111,7 +111,7 @@ GLUtil.create_video_texture = function (gl, url)
 
     let video = document.createElement('video');
     video.autoplay = true;
-    video.muted    = true;
+    video.muted    = false;
     video.loop     = true;
 
     let playing    = false;
@@ -120,16 +120,14 @@ GLUtil.create_video_texture = function (gl, url)
     // Waiting for these 2 events ensures there is data in the video
     video.addEventListener('playing',    function(){playing    = true; checkReady();}, true);
     video.addEventListener('timeupdate', function(){timeupdate = true; checkReady();}, true);
-
+    video.addEventListener('waiting', function(){playing    = false; timeupdate = false; checkReady();}, true);
+    video.addEventListener('ended', function(){playing    = false; timeupdate = false; checkReady();}, true);
     video.src = url;
     video.play();
 
     function checkReady()
     {
-        if (playing && timeupdate)
-        {
-            video_tex.ready = true;
-        }
+        video_tex.ready = playing && timeupdate
     }
 
     video_tex.video = video;
@@ -201,7 +199,7 @@ GLUtil.create_camera_texture = function (gl)
 
     function on_camera_failed (err)
     {
-        alert('failed to initialize a camera');
+        //alert('failed to initialize a camera');
         return camera_tex;
     }
 
@@ -249,4 +247,3 @@ GLUtil.update_camera_texture = function (gl, camera_tex)
         gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, camera_tex.video);
     }
 }
-
