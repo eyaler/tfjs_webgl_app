@@ -103,7 +103,7 @@ GLUtil.is_image_texture_ready = function (image_tex)
 /* ---------------------------------------------------------------- *
  *  Create Video Texture
  * ---------------------------------------------------------------- */
-GLUtil.create_video_texture = function (gl, url)
+GLUtil.create_video_texture = function (gl, url, muted)
 {
     let video_tex = {};
     video_tex.ready = false;
@@ -111,7 +111,7 @@ GLUtil.create_video_texture = function (gl, url)
 
     let video = document.createElement('video');
     video.autoplay = true;
-    video.muted    = false;
+    video.muted    = muted;
     video.loop     = true;
 
     let playing    = false;
@@ -122,6 +122,7 @@ GLUtil.create_video_texture = function (gl, url)
     video.addEventListener('timeupdate', function(){timeupdate = true; checkReady();}, true);
     video.addEventListener('waiting', function(){playing    = false; timeupdate = false; checkReady();}, true);
     video.addEventListener('stalled', function(){playing    = false; timeupdate = false; checkReady();}, true);
+    video.addEventListener('suspend', function(){playing    = false; timeupdate = false; checkReady();}, true);
     video.addEventListener('ended', function(){playing    = false; timeupdate = false; checkReady();}, true);
     video.src = url;
     video.play();
@@ -200,7 +201,7 @@ GLUtil.create_camera_texture = function (gl)
 
     function on_camera_failed (err)
     {
-        //alert('failed to initialize a camera');
+        alert('failed to initialize a camera');
         return camera_tex;
     }
 

@@ -31,10 +31,13 @@ render.strFS = `
 
     void main(void)
     {
-        vec3 color;
-        color = vec3(texture2D(u_sampler, v_texcoord));
-        color *= u_color;
-        gl_FragColor = vec4(color, v_vtxalpha * u_alpha);
+        vec4 color;
+        color = vec4(texture2D(u_sampler, v_texcoord));
+        color[0] *= u_color[0];
+        color[1] *= u_color[1];
+        color[2] *= u_color[2];
+        color[3] *= v_vtxalpha * u_alpha;
+        gl_FragColor = color;
     }
 `;
 

@@ -11,7 +11,7 @@ let s_drop_files = [];
 class GuiProperty {
     constructor() {
         this.srcimg_scale = 1.0;
-        this.mask_alpha   = 1.0;
+        this.mask_alpha   = 0.7;
         this.flip_horizontal = false;
         this.mask_eye_hole = false;
         this.draw_pmeter = false;
@@ -202,7 +202,8 @@ function render_progress_bar (gl, current_phase, face_predictions, win_w, win_h)
     x = win_w * 0.5 - 100;
     y = win_h * 0.5 - 11;
     let str = " show me your face ";
-    dbgstr.draw_dbgstr_ex (gl, str, x, y, 1, [0.0, 1.0, 1.0, 1.0], [0.2, 0.2, 0.2, 1.0]);
+    if (s_gui_prop.overlay_stats)
+        dbgstr.draw_dbgstr_ex (gl, str, x, y, 1, [0.0, 1.0, 1.0, 1.0], [0.2, 0.2, 0.2, 1.0]);
 }
 
 
@@ -273,10 +274,6 @@ function on_drop (event)
 /* ---------------------------------------------------------------- *
  *      M A I N    F U N C T I O N
  * ---------------------------------------------------------------- */
-let have_video = false;
-let src_h;
-let src_w;
-let texid;
 function startWebGL()
 {
     s_debug_log = document.getElementById('debug_log');
@@ -299,11 +296,9 @@ function startWebGL()
 
     init_gui ();
 
-    let camtex = GLUtil.create_camera_texture (gl);
-    //const camtex = GLUtil.create_video_texture (gl, "./assets/just_do_it.mp4");
-    const imgtex = GLUtil.create_image_texture2 (gl, "pakutaso_sotsugyou.jpg");
-
-    let masktex = GLUtil.create_image_texture2 (gl, "./assets/mask/khamun.jpg");
+    let camtex = GLUtil.create_video_texture (gl, "./assets/peele.mp4", true);
+    //let masktex = GLUtil.create_image_texture2 (gl, "./assets/mask/khamun.jpg");
+    let masktex = GLUtil.create_image_texture2 (gl, "./assets/mask/obama.png");
     let masktex_next;
     let mask_predictions = {length: 0};
     let mask_init_done = false;
@@ -325,6 +320,11 @@ function startWebGL()
         reader.onload = function(e) { camtex = GLUtil.create_video_texture(gl, e.target.result);}
         reader.readAsDataURL(e.target.files[0]);
     };
+
+    document.getElementById("camera").onclick = function(e) {
+        camtex.ready = false;
+        camtex = GLUtil.create_camera_texture (gl);
+    }
 
     /* --------------------------------- *
      *  load FACEMESH
@@ -356,6 +356,10 @@ function startWebGL()
     spinner.classList.add('loaded');
 
     let prev_time_ms = performance.now();
+    let src_w;
+    let src_h;
+    let texid;
+    let have=false;
     async function render (now)
     {
         pmeter.reset_lap (0);
@@ -413,67 +417,61 @@ function startWebGL()
             gl.scissor  (0, 0, win_w, win_h);
         }
 
-        if (!have_video)
-        {
-            src_w = imgtex.image.width;
-            src_h = imgtex.image.height;
-            texid = imgtex.texid;
-        }
         if (GLUtil.is_camera_ready(camtex))
         {
-            have_video = true;
             GLUtil.update_camera_texture (gl, camtex);
             src_w = camtex.video.videoWidth;
             src_h = camtex.video.videoHeight;
             texid = camtex.texid;
+            have = true
         }
 
-        /* --------------------------------------- *
-         *  invoke TF.js (Facemesh)
-         * --------------------------------------- */
-        s_srctex_region = calc_size_to_fit (gl, src_w, src_h, win_w, win_h);
-        let face_predictions = {length: 0};
-        let time_invoke0 = 0;
+        if (have) {
+            /* --------------------------------------- *
+             *  invoke TF.js (Facemesh)
+             * --------------------------------------- */
+            s_srctex_region = calc_size_to_fit (gl, src_w, src_h, win_w, win_h);
+            let face_predictions = {length: 0};
+            let time_invoke0 = 0;
 
-        if (facemesh_ready)
-        {
-            current_phase = 2;
-            let time_invoke1_start = performance.now();
-
-            num_repeat = mask_updated ? 2 : 1;
-            for (let i = 0; i < num_repeat; i ++) /* repeat 5 times to flush pipeline ? */
+            if (facemesh_ready)
             {
-                if (GLUtil.is_camera_ready(camtex))
-                    face_predictions = await facemesh_model.estimateFaces ({input: camtex.video});
-                else if (!have_video)
-                    face_predictions = await facemesh_model.estimateFaces ({input: imgtex.image});
+                current_phase = 2;
+                let time_invoke1_start = performance.now();
+
+                num_repeat = mask_updated ? 2 : 1;
+                for (let i = 0; i < num_repeat; i ++) /* repeat 5 times to flush pipeline ? */
+                {
+                    if (GLUtil.is_camera_ready(camtex))
+                        face_predictions = await facemesh_model.estimateFaces ({input: camtex.video});
+                }
+                time_invoke0 = performance.now() - time_invoke1_start;
             }
-            time_invoke0 = performance.now() - time_invoke1_start;
-        }
 
-        /* --------------------------------------- *
-         *  render scene
-         * --------------------------------------- */
-        gl.clear (gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+            /* --------------------------------------- *
+             *  render scene
+             * --------------------------------------- */
+            gl.clear (gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-        render_2d_scene (gl, texid, face_predictions, src_w, src_h, masktex, mask_predictions);
-        render_progress_bar (gl, current_phase, face_predictions, win_w, win_h);
+            render_2d_scene (gl, texid, face_predictions, src_w, src_h, masktex, mask_predictions);
+            render_progress_bar (gl, current_phase, face_predictions, win_w, win_h);
 
-        /* --------------------------------------- *
-         *  post process
-         * --------------------------------------- */
-        if (s_gui_prop.draw_pmeter)
-        {
-            pmeter.draw_pmeter (gl, 0, 40);
-        }
+            /* --------------------------------------- *
+             *  post process
+             * --------------------------------------- */
+            if (s_gui_prop.draw_pmeter)
+            {
+                pmeter.draw_pmeter (gl, 0, 40);
+            }
 
-        if (s_gui_prop.overlay_stats)
-        {
-            let str = "Interval: " + interval_ms.toFixed(1) + " [ms]";
-            dbgstr.draw_dbgstr (gl, str, 10, 10);
+            if (s_gui_prop.overlay_stats)
+            {
+                let str = "Interval: " + interval_ms.toFixed(1) + " [ms]";
+                dbgstr.draw_dbgstr (gl, str, 10, 10);
 
-            str = "TF.js0  : " + time_invoke0.toFixed(1)  + " [ms]";
-            dbgstr.draw_dbgstr (gl, str, 10, 10 + 22 * 1);
+                str = "TF.js0  : " + time_invoke0.toFixed(1)  + " [ms]";
+                dbgstr.draw_dbgstr (gl, str, 10, 10 + 22 * 1);
+            }
         }
         stats.end();
         requestAnimationFrame (render);
