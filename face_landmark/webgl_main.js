@@ -274,6 +274,9 @@ function on_drop (event)
  *      M A I N    F U N C T I O N
  * ---------------------------------------------------------------- */
 let have_video = false;
+let src_h;
+let src_w;
+let texid;
 function startWebGL()
 {
     s_debug_log = document.getElementById('debug_log');
@@ -317,6 +320,7 @@ function startWebGL()
     const stats = init_stats ();
 
     document.getElementById("video").onchange = function(e) {
+        camtex.ready = false;
         const reader = new FileReader();
         reader.onload = function(e) { camtex = GLUtil.create_video_texture(gl, e.target.result);}
         reader.readAsDataURL(e.target.files[0]);
@@ -409,10 +413,12 @@ function startWebGL()
             gl.scissor  (0, 0, win_w, win_h);
         }
 
-
-        let src_w = imgtex.image.width;
-        let src_h = imgtex.image.height;
-        let texid = imgtex.texid;
+        if (!have_video)
+        {
+            src_w = imgtex.image.width;
+            src_h = imgtex.image.height;
+            texid = imgtex.texid;
+        }
         if (GLUtil.is_camera_ready(camtex))
         {
             have_video = true;

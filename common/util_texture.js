@@ -121,6 +121,7 @@ GLUtil.create_video_texture = function (gl, url)
     video.addEventListener('playing',    function(){playing    = true; checkReady();}, true);
     video.addEventListener('timeupdate', function(){timeupdate = true; checkReady();}, true);
     video.addEventListener('waiting', function(){playing    = false; timeupdate = false; checkReady();}, true);
+    video.addEventListener('stalled', function(){playing    = false; timeupdate = false; checkReady();}, true);
     video.addEventListener('ended', function(){playing    = false; timeupdate = false; checkReady();}, true);
     video.src = url;
     video.play();
