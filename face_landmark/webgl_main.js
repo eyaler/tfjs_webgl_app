@@ -315,6 +315,7 @@ function startWebGL()
     const stats = init_stats ();
 
     document.getElementById("video").onchange = function(e) {
+        if (camtex.ready) camtex.video.pause();
         camtex.ready = false;
         const reader = new FileReader();
         reader.onload = function(e) { camtex = GLUtil.create_video_texture(gl, e.target.result);}
@@ -443,7 +444,10 @@ function startWebGL()
                 for (let i = 0; i < num_repeat; i ++) /* repeat 5 times to flush pipeline ? */
                 {
                     if (GLUtil.is_camera_ready(camtex))
-                        face_predictions = await facemesh_model.estimateFaces ({input: camtex.video});
+                        try {
+                            face_predictions = await facemesh_model.estimateFaces ({input: camtex.video});
+                        }
+                        catch(e){console.log(e);}
                 }
                 time_invoke0 = performance.now() - time_invoke1_start;
             }
