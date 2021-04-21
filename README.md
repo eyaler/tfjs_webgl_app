@@ -1,4 +1,6 @@
-# A clone of https://terryky.github.io/tfjs_webgl_app adding video option for FaceSwap 
+# A fork of https://terryky.github.io/tfjs_webgl_app with some added FaceSwap sugar:
+1. option to upload local video + restart button
+2. respect PNG mask transparency
 
 # tfjs_webgl_app
 WebGL visualization apps using TensorFlow.js

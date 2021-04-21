@@ -136,6 +136,11 @@ GLUtil.create_video_texture = function (gl, url, muted)
     return video_tex;
 }
 
+GLUtil.restart_video_texture = function (video_tex)
+{
+    if (video_tex.ready) {video_tex.video.currentTime = 0; video_tex.video.muted = false;}
+}
+
 GLUtil.get_video_resolution = function (video_tex)
 {
     let width  = 0;

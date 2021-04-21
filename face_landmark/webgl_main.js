@@ -16,6 +16,8 @@ class GuiProperty {
         this.mask_eye_hole = false;
         this.draw_pmeter = false;
         this.overlay_stats = false;
+        this.retain_aspect = false;
+        this.retain_hair = false;
     }
 }
 const s_gui_prop = new GuiProperty();
@@ -244,6 +246,8 @@ init_gui ()
     gui.add (s_gui_prop, 'mask_alpha', 0.0, 1.0);
     gui.add (s_gui_prop, 'flip_horizontal');
     gui.add (s_gui_prop, 'mask_eye_hole');
+    //gui.add (s_gui_prop, 'retain_aspect');
+    //gui.add (s_gui_prop, 'retain_hair');
     gui.add (s_gui_prop, 'draw_pmeter');
     gui.add (s_gui_prop, 'overlay_stats');
 }
@@ -322,6 +326,10 @@ function startWebGL()
         reader.onload = function(e) { camtex = GLUtil.create_video_texture(gl, e.target.result);}
         reader.readAsDataURL(e.target.files[0]);
     };
+
+    document.getElementById("restart").onclick = function(e) {
+        GLUtil.restart_video_texture(camtex)
+    }
 
     document.getElementById("camera").onclick = function(e) {
         camtex.ready = false;
