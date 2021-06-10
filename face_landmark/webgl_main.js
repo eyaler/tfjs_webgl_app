@@ -104,8 +104,8 @@ render_2d_scene (gl, texid, face_predictions, tex_w, tex_h,
     gl.disable (gl.DEPTH_TEST);
 
     let flip = flip_h ? r2d.FLIP_H : 0
-    if s_gui_prop.show_bg:
-        r2d.draw_2d_texture (gl, texid, tx, ty, tw, th, flip)
+    if (s_gui_prop.show_bg)
+        {r2d.draw_2d_texture (gl, texid, tx, ty, tw, th, flip);}
 
     let mask_color = [1.0, 1.0, 1.0, s_gui_prop.mask_alpha];
     if (s_is_dragover)
