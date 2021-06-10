@@ -12,6 +12,7 @@ class GuiProperty {
     constructor() {
         this.srcimg_scale = 1.0;
         this.mask_alpha   = 0.7;
+        this.show_bg = true;
         this.flip_horizontal = false;
         this.mask_eye_hole = false;
         this.draw_pmeter = false;
@@ -103,7 +104,8 @@ render_2d_scene (gl, texid, face_predictions, tex_w, tex_h,
     gl.disable (gl.DEPTH_TEST);
 
     let flip = flip_h ? r2d.FLIP_H : 0
-    r2d.draw_2d_texture (gl, texid, tx, ty, tw, th, flip)
+    if s_gui_prop.show_bg:
+        r2d.draw_2d_texture (gl, texid, tx, ty, tw, th, flip)
 
     let mask_color = [1.0, 1.0, 1.0, s_gui_prop.mask_alpha];
     if (s_is_dragover)
@@ -244,6 +246,7 @@ init_gui ()
 
     gui.add (s_gui_prop, 'srcimg_scale', 0, 5.0);
     gui.add (s_gui_prop, 'mask_alpha', 0.0, 1.0);
+    gui.add (s_gui_prop, 'show_bg');
     gui.add (s_gui_prop, 'flip_horizontal');
     gui.add (s_gui_prop, 'mask_eye_hole');
     //gui.add (s_gui_prop, 'retain_aspect');
