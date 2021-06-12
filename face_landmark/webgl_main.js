@@ -12,7 +12,7 @@ class GuiProperty {
     constructor() {
         this.srcimg_scale = 1.0;
         this.mask_alpha   = 0.7;
-        this.show_bg = true;
+        this.background = 'normal';
         this.flip_horizontal = false;
         this.mask_eye_hole = false;
         this.draw_pmeter = false;
@@ -100,11 +100,17 @@ render_2d_scene (gl, texid, face_predictions, tex_w, tex_h,
     let th = s_srctex_region.tex_h;
     let scale = s_srctex_region.scale;
     let flip_h = s_gui_prop.flip_horizontal;
+    let bg = s_gui_prop.background;
+
+    if (bg=='white') {gl.clearColor (1.0, 1.0, 1.0, 1.0);}
+    else if (bg=='black') {gl.clearColor (0.0, 0.0, 0.0, 1.0);}
+    else if (bg=='green') {gl.clearColor (0,177/255,64/255, 1.0);}
+    else if (bg=='blue') {gl.clearColor (0,71/255,187/255, 1.0);}
 
     gl.disable (gl.DEPTH_TEST);
 
     let flip = flip_h ? r2d.FLIP_H : 0
-    if (s_gui_prop.show_bg)
+    if (bg=='normal')
         {r2d.draw_2d_texture (gl, texid, tx, ty, tw, th, flip);}
 
     let mask_color = [1.0, 1.0, 1.0, s_gui_prop.mask_alpha];
@@ -246,7 +252,7 @@ init_gui ()
 
     gui.add (s_gui_prop, 'srcimg_scale', 0, 5.0);
     gui.add (s_gui_prop, 'mask_alpha', 0.0, 1.0);
-    gui.add (s_gui_prop, 'show_bg');
+    gui.add (s_gui_prop, 'background', ['normal','white','black','green','blue']);
     gui.add (s_gui_prop, 'flip_horizontal');
     gui.add (s_gui_prop, 'mask_eye_hole');
     //gui.add (s_gui_prop, 'retain_aspect');
@@ -295,7 +301,7 @@ function startWebGL()
         return;
     }
 
-    gl.clearColor (1.0, 1.0, 1.0, 1.0);
+    gl.clearColor (0.7,0.7,0.7, 1.0);
     gl.clear (gl.COLOR_BUFFER_BIT);
 
     canvas.addEventListener ('dragover',  on_dragover);
