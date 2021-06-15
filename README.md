@@ -1,4 +1,5 @@
-# A fork of https://terryky.github.io/tfjs_webgl_app with some added FaceSwap sugar:
+# A fork of https://terryky.github.io/tfjs_webgl_app with some added FaceSwap sugar for videos:
+## https://j.mp/facemesh
 1. option to switch beteen camera and video
 2. rewind button
 3. video with mask can be recorded

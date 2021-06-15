@@ -10,6 +10,7 @@ let s_drop_files = [];
 let s_drop_url = null;
 let is_camera = false;
 let is_record = false;
+let rec_camera = false;
 let old_video = null;
 let old_video_name = '';
 let have_user_interaction = false;
@@ -105,7 +106,7 @@ render_2d_scene (gl, texid, face_predictions, tex_w, tex_h,
     let tw = s_srctex_region.tex_w;
     let th = s_srctex_region.tex_h;
     let scale = s_srctex_region.scale;
-    let flip_h = s_gui_prop.flip_horizontal;
+    let flip_h = s_gui_prop.flip_horizontal^is_camera;
     let bg = s_gui_prop.background;
 
     if (bg=='white') {gl.clearColor (1.0, 1.0, 1.0, 1.0);}
@@ -314,7 +315,7 @@ function startWebGL()
         return;
     }
 
-    gl.clearColor (0.7,0.7,0.7, 1.0);
+    gl.clearColor (0.0,0.0,0.0, 1.0);
     gl.clear (gl.COLOR_BUFFER_BIT);
 
     document.addEventListener ('dragover',  on_dragover);
@@ -324,6 +325,8 @@ function startWebGL()
     init_gui ();
     let mediaRecorder;
     let recordedChunks;
+    let recorder_canvas_stream;
+    let recorder_video_stream;
     let camtex = GLUtil.create_video_texture (gl, "./assets/peele.mp4", !have_user_interaction);
     //let masktex = GLUtil.create_image_texture2 (gl, "./assets/mask/khamun.jpg");
     let masktex = GLUtil.create_image_texture2 (gl, "./assets/mask/obama.png");
@@ -343,7 +346,7 @@ function startWebGL()
     const stats = init_stats ();
 
     function unmute(){
-        camtex.video.muted = false;
+        if (!is_camera) {camtex.video.muted = false;}
         have_user_interaction = true;
     }
 
@@ -369,9 +372,21 @@ function startWebGL()
         if (!is_record)
         {
             recordedChunks = [];
-            var stream = canvas.captureStream(30);
-            mediaRecorder = new MediaRecorder(stream);
-            mediaRecorder.ondataavailable = function handleDataAvailable(event) {
+            recorder_canvas_stream = canvas.captureStream();
+            if (is_camera)
+            {
+                recorder_video_stream = camtex.video.srcObject;
+                rec_camera = true;
+            }
+            else
+            {
+                recorder_video_stream = camtex.video.mozCaptureStream ? camtex.video.mozCaptureStream() : camtex.video.captureStream();
+                rec_camera = false;
+            }
+            var audio_track = recorder_video_stream.getAudioTracks()[0];
+            recorder_canvas_stream.addTrack(audio_track);
+            mediaRecorder = new MediaRecorder(recorder_canvas_stream);
+            mediaRecorder.ondataavailable = function (event) {
               if (event.data&&event.data.size > 0) {
                 recordedChunks.push(event.data);
               }
@@ -382,23 +397,28 @@ function startWebGL()
         }
         else
         {
-            mediaRecorder.stop();
-            var blob = new Blob(recordedChunks, {type: 'video/mp4'});
-            recordedChunks = [];
-            var url = URL.createObjectURL(blob);
-            console.log(url);
-            var a = document.createElement('a');
-            a.style = 'display: none';
-            a.href = url;
-            a.download = 'faceswap.mp4';
-            document.body.appendChild(a);
-            a.click();
-            setTimeout(() => {
-                a.remove();
-                window.URL.revokeObjectURL(url);
-            }, 100);
+            mediaRecorder.onstop = function() {
+                if (rec_camera) {recorder_video_stream.getTracks().forEach(track => track.stop());}
+                recorder_video_stream = '';
+                recorder_canvas_stream.getTracks().forEach(track => track.stop());
+                recorder_canvas_stream = '';
+                var blob = new Blob(recordedChunks, {type: 'video/mp4'});
+                var url = URL.createObjectURL(blob);
+                console.log(url);
+                var a = document.createElement('a');
+                a.style = 'display: none';
+                a.href = url;
+                a.download = 'faceswap.mp4';
+                document.body.appendChild(a);
+                a.click();
+                setTimeout(() => {
+                    a.remove();
+                    window.URL.revokeObjectURL(url);
+                }, 100);
 
-            document.getElementById("record").style= '';
+                document.getElementById("record").style= '';
+            }
+            mediaRecorder.stop();
         }
         is_record = !is_record;
 
@@ -455,6 +475,7 @@ function startWebGL()
             camtex = GLUtil.create_video_texture(gl, url, !have_user_interaction);
             document.getElementById("upload_video").value = '';
             document.getElementById("camera_btn").style = '';
+            is_camera = false;
         }
     }
 

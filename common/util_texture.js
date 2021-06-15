@@ -188,6 +188,7 @@ GLUtil.create_camera_texture = function (gl)
     video = document.createElement('video');
     video.autoplay = true;
     video.loop     = true;
+    video.muted    = true;
 
     navigator.mediaDevices = navigator.mediaDevices ||
                              navigator.mozGetUserMedia
@@ -216,7 +217,7 @@ GLUtil.create_camera_texture = function (gl)
     }
 
     const constraints = {
-        audio : false,
+        audio : true,
         video: {
             width:  {ideal: 640},
             height: {ideal: 480}
@@ -262,7 +263,7 @@ GLUtil.stop_camera = function (camera_tex)
 {
     try
     {
-        camera_tex.video.srcObject.getTracks().forEach(function(track) {track.stop();});
+        camera_tex.video.srcObject.getTracks().forEach(track => track.stop());
         video_tex.video.srcObject='';
     }
     catch(e){
