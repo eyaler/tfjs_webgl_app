@@ -25,6 +25,14 @@ h1
     color:#888888;
 }
 
+h2
+{
+    font: 2em normal Arial, Helvetica, sans-serif;
+    padding: 20px;	margin: 0;
+    text-align:center;
+    color:#888888;
+}
+
 h1 small
 {
     font-size: 0.5em;
@@ -50,7 +58,7 @@ h1 small
     width: 100px;
     height: 100px;
     margin: 200px auto;
-    background-color: #0;
+    background-color: #000000;
     border-radius: 100%;
     border: 10px solid #888888;
     border-right-color: transparent;

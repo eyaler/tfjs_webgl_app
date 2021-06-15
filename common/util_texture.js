@@ -34,7 +34,7 @@ GLUtil.create_image_texture = function (gl, url)
 {
     let texid = GLUtil.create_texture (gl);
     let teximage = new Image();
-
+    teximage.crossOrigin = "anonymous";
     teximage.onload = function ()
     {
         gl.bindTexture(gl.TEXTURE_2D, texid);
@@ -52,6 +52,7 @@ GLUtil.create_image_texture2 = function (gl, url)
     image_tex.ready = false;
     let texid = GLUtil.create_texture (gl);
     let teximage = new Image();
+    teximage.crossOrigin = "anonymous";
 
     teximage.onload = function ()
     {
@@ -103,34 +104,38 @@ GLUtil.is_image_texture_ready = function (image_tex)
 /* ---------------------------------------------------------------- *
  *  Create Video Texture
  * ---------------------------------------------------------------- */
-GLUtil.create_video_texture = function (gl, url, muted)
+GLUtil.create_video_texture = function (gl, url, muted=false)
 {
     let video_tex = {};
     video_tex.ready = false;
     video_tex.texid = GLUtil.create_texture (gl);
 
-    let video = document.createElement('video');
+    video = document.createElement('video');
     video.autoplay = true;
     video.muted    = muted;
     video.loop     = true;
-
+    video.crossOrigin = "anonymous";
     let playing    = false;
     let timeupdate = false;
 
     // Waiting for these 2 events ensures there is data in the video
+    function checkReady()
+    {
+        video_tex.ready = playing && timeupdate;
+    }
+
     video.addEventListener('playing',    function(){playing    = true; checkReady();}, true);
     video.addEventListener('timeupdate', function(){timeupdate = true; checkReady();}, true);
     video.addEventListener('waiting', function(){playing    = false; timeupdate = false; checkReady();}, true);
     video.addEventListener('stalled', function(){playing    = false; timeupdate = false; checkReady();}, true);
     video.addEventListener('suspend', function(){playing    = false; timeupdate = false; checkReady();}, true);
     video.addEventListener('ended', function(){playing    = false; timeupdate = false; checkReady();}, true);
-    video.src = url;
-    video.play();
 
-    function checkReady()
+    video.onload = function ()
     {
-        video_tex.ready = playing && timeupdate
+        video.play();
     }
+    video.src = url;
 
     video_tex.video = video;
     return video_tex;
@@ -138,7 +143,7 @@ GLUtil.create_video_texture = function (gl, url, muted)
 
 GLUtil.restart_video_texture = function (video_tex)
 {
-    if (video_tex.ready) {video_tex.video.currentTime = 0; video_tex.video.muted = false;}
+    if (video_tex.ready) {video_tex.video.currentTime = 0;}
 }
 
 GLUtil.get_video_resolution = function (video_tex)
@@ -180,7 +185,7 @@ GLUtil.create_camera_texture = function (gl)
     camera_tex.ready = false;
     camera_tex.texid = GLUtil.create_texture (gl);
 
-    let video = document.createElement('video');
+    video = document.createElement('video');
     video.autoplay = true;
     video.loop     = true;
 
@@ -218,9 +223,7 @@ GLUtil.create_camera_texture = function (gl)
         }
     };
 
-    const promise = navigator.mediaDevices.getUserMedia (constraints);
-    promise.then (on_camera_ready)
-           .catch(on_camera_failed);
+    navigator.mediaDevices.getUserMedia (constraints).then (on_camera_ready).catch(on_camera_failed);
 
     camera_tex.video = video;
     return camera_tex;
@@ -252,5 +255,29 @@ GLUtil.update_camera_texture = function (gl, camera_tex)
     {
         gl.bindTexture(gl.TEXTURE_2D, camera_tex.texid);
         gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, camera_tex.video);
+    }
+}
+
+GLUtil.stop_camera = function (camera_tex)
+{
+    try
+    {
+        camera_tex.video.srcObject.getTracks().forEach(function(track) {track.stop();});
+        video_tex.video.srcObject='';
+    }
+    catch(e){
+        //console.log(e);
+    }
+}
+
+GLUtil.stop_video = function (video_tex)
+{
+    try
+    {
+        video_tex.video.pause();
+        video_tex.video.src='';
+    }
+    catch(e){
+        //console.log(e);
     }
 }

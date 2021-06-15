@@ -7,6 +7,12 @@
 let s_debug_log;
 let s_is_dragover = false;
 let s_drop_files = [];
+let s_drop_url = null;
+let is_camera = false;
+let is_record = false;
+let old_video = null;
+let old_video_name = '';
+let have_user_interaction = false;
 
 class GuiProperty {
     constructor() {
@@ -114,10 +120,16 @@ render_2d_scene (gl, texid, face_predictions, tex_w, tex_h,
         {r2d.draw_2d_texture (gl, texid, tx, ty, tw, th, flip);}
 
     let mask_color = [1.0, 1.0, 1.0, s_gui_prop.mask_alpha];
+    document.body.style.backgroundColor = 'initial';
     if (s_is_dragover)
+    {
         mask_color = [0.8, 0.8, 0.8, 1.0];
+        document.body.style.backgroundColor = 'yellow';
+    }
 
-    for (let i = 0; i < face_predictions.length; i++) 
+    if (!masktex) {return;}
+
+    for (let i = 0; i < face_predictions.length; i++)
     {
         const keypoints = face_predictions[i].scaledMesh;
 
@@ -282,6 +294,7 @@ function on_drop (event)
     event.preventDefault();
     s_is_dragover = false;
     s_drop_files = event.dataTransfer.files;
+    s_drop_url = event.dataTransfer.getData("text/html")||event.dataTransfer.getData("url");
 }
 
 
@@ -304,13 +317,14 @@ function startWebGL()
     gl.clearColor (0.7,0.7,0.7, 1.0);
     gl.clear (gl.COLOR_BUFFER_BIT);
 
-    canvas.addEventListener ('dragover',  on_dragover);
-    canvas.addEventListener ('dragleave', on_dragleave);
-    canvas.addEventListener ('drop' ,     on_drop);
+    document.addEventListener ('dragover',  on_dragover);
+    document.addEventListener ('dragleave', on_dragleave);
+    document.addEventListener ('drop' ,     on_drop);
 
     init_gui ();
-
-    let camtex = GLUtil.create_video_texture (gl, "./assets/peele.mp4", true);
+    let mediaRecorder;
+    let recordedChunks;
+    let camtex = GLUtil.create_video_texture (gl, "./assets/peele.mp4", !have_user_interaction);
     //let masktex = GLUtil.create_image_texture2 (gl, "./assets/mask/khamun.jpg");
     let masktex = GLUtil.create_image_texture2 (gl, "./assets/mask/obama.png");
     let masktex_next;
@@ -328,21 +342,120 @@ function startWebGL()
     pmeter.init_pmeter (gl, win_w, win_h, win_h - 40);
     const stats = init_stats ();
 
-    document.getElementById("video").onchange = function(e) {
-        if (camtex.ready) camtex.video.pause();
-        camtex.ready = false;
-        const reader = new FileReader();
-        reader.onload = function(e) { camtex = GLUtil.create_video_texture(gl, e.target.result);}
-        reader.readAsDataURL(e.target.files[0]);
-    };
-
-    document.getElementById("restart").onclick = function(e) {
-        GLUtil.restart_video_texture(camtex)
+    function unmute(){
+        camtex.video.muted = false;
+        have_user_interaction = true;
     }
 
-    document.getElementById("camera").onclick = function(e) {
-        camtex.ready = false;
-        camtex = GLUtil.create_camera_texture (gl);
+    document.onmousedown = function(e) {
+    unmute();
+    document.onmousedown = '';
+    }
+
+    document.getElementById("upload_video").onchange = function(e) {
+        s_drop_files = e.target.files;
+    };
+
+    document.getElementById("upload_mask").onchange = function(e) {
+        s_drop_files = e.target.files;
+    };
+
+    document.getElementById("rewind").onclick = function(e) {
+        GLUtil.restart_video_texture(camtex);
+    }
+
+    document.getElementById("record").onclick = function(e)
+    {
+        if (!is_record)
+        {
+            recordedChunks = [];
+            var stream = canvas.captureStream(30);
+            mediaRecorder = new MediaRecorder(stream);
+            mediaRecorder.ondataavailable = function handleDataAvailable(event) {
+              if (event.data&&event.data.size > 0) {
+                recordedChunks.push(event.data);
+              }
+            }
+            GLUtil.restart_video_texture(camtex);
+            mediaRecorder.start();
+            document.getElementById("record").style.backgroundColor = 'red';
+        }
+        else
+        {
+            mediaRecorder.stop();
+            var blob = new Blob(recordedChunks, {type: 'video/mp4'});
+            recordedChunks = [];
+            var url = URL.createObjectURL(blob);
+            console.log(url);
+            var a = document.createElement('a');
+            a.style = 'display: none';
+            a.href = url;
+            a.download = 'faceswap.mp4';
+            document.body.appendChild(a);
+            a.click();
+            setTimeout(() => {
+                a.remove();
+                window.URL.revokeObjectURL(url);
+            }, 100);
+
+            document.getElementById("record").style= '';
+        }
+        is_record = !is_record;
+
+
+    }
+
+    document.getElementById("camera_btn").onclick = function(e) {
+        if (!is_camera)
+        {
+            camtex.video.muted = true;
+            old_video = camtex;
+            old_video_name = document.getElementById("upload_video").value;
+            camtex = GLUtil.create_camera_texture (gl);
+            document.getElementById("upload_video").value = '';
+            document.getElementById("camera_btn").style.backgroundColor = 'red';
+        }
+        else
+        {
+            GLUtil.stop_camera(camtex);
+            camtex = old_video;
+            unmute();
+            document.getElementById("upload_video").value = old_video_name;
+            document.getElementById("camera_btn").style = '';
+        }
+        is_camera = !is_camera;
+    }
+
+    document.getElementById("remove").onclick = function(e) {
+        masktex = null;
+        document.getElementById("upload_mask").value = '';
+    }
+
+    async function get_media(gl, url, contenttype=null)
+    {
+        if (!contenttype)
+        {
+            contenttype = await fetch(url, {method: 'HEAD'})
+                .then(response => {return response.headers.get('content-type');})
+                .catch((error) => {console.error('Error:', error); alert('Server is blocking drag and drop from web but you can download the media and drag or upload from computer'); return '';});
+        }
+        console.log('contenttype='+contenttype);
+        if (contenttype.match('image.*'))
+        {
+            masktex_next = GLUtil.create_image_texture2(gl, url);
+            mask_update_req = true;
+            document.getElementById("upload_mask").value = '';
+        }
+        else if (contenttype.match('video.*'))
+        {
+            GLUtil.stop_camera(camtex);
+            GLUtil.stop_video(old_video);
+            GLUtil.stop_video(camtex);
+
+            camtex = GLUtil.create_video_texture(gl, url, !have_user_interaction);
+            document.getElementById("upload_video").value = '';
+            document.getElementById("camera_btn").style = '';
+        }
     }
 
     /* --------------------------------- *
@@ -395,6 +508,48 @@ function startWebGL()
         win_w = canvas.width;
         win_h = canvas.height;
 
+        if (s_drop_files.length > 0 || s_drop_url)
+        {
+            if (s_drop_url)
+            {
+                let contenttype = null;
+                if (s_drop_url.includes('<img '))
+                {
+                    s_drop_url = s_drop_url.split('<img ',2).slice(-1)[0];
+                    contenttype = 'image';
+                }
+                else if (s_drop_url.includes('<video'))
+                {
+                    s_drop_url = s_drop_url.split('<video',2).slice(-1)[0];
+                    contnettype = 'video';
+                }
+                if (s_drop_url.includes('src="'))
+                {
+                    s_drop_url = s_drop_url.split('src="',2).slice(-1)[0];
+                }
+                else
+                {
+                    s_drop_url = s_drop_url.split('href="',2).slice(-1)[0];
+                }
+                s_drop_url = s_drop_url.split('"',1)[0];
+                //console.log('getting from url:',s_drop_url);
+                get_media(gl, s_drop_url, contenttype);
+            }
+            else
+            {
+                let reader = new FileReader();
+                let contenttype = s_drop_files[0].type;
+                reader.onload = function (event)
+                {
+                    let src = event.target.result;
+                    get_media(gl, src, contenttype);
+                }
+                reader.readAsDataURL(s_drop_files[0]);
+            }
+
+            s_drop_files = [];
+            s_drop_url = null;
+        }
 
         /* --------------------------------------- *
          *  Update Mask (if need)
@@ -411,18 +566,12 @@ function startWebGL()
                 mask_updated = true;
             }
 
-            if (s_drop_files.length > 0)
-            {
-                masktex_next = GLUtil.create_image_texture_from_file (gl, s_drop_files[0]);
-                mask_update_req = true;
-                s_drop_files = [];
-            }
-
             if (mask_update_req)
             {
                 /* if readfile has done, update face mask */
-                if (masktex_next.image.width > 0)
+                if (GLUtil.is_image_texture_ready(masktex_next))
                 {
+                    console.log('changing mask');
                     for (let i = 0; i < 5; i ++) /* repeat 5 times to flush pipeline ? */
                         mask_predictions = await facemesh_model.estimateFaces ({input: masktex_next.image});
                     mask_update_req = false;
@@ -442,7 +591,7 @@ function startWebGL()
             src_w = camtex.video.videoWidth;
             src_h = camtex.video.videoHeight;
             texid = camtex.texid;
-            have = true
+            have = true;
         }
 
         if (have) {
@@ -465,7 +614,9 @@ function startWebGL()
                         try {
                             face_predictions = await facemesh_model.estimateFaces ({input: camtex.video});
                         }
-                        catch(e){console.log(e);}
+                        catch(e){
+                        //console.log(e);
+                        }
                 }
                 time_invoke0 = performance.now() - time_invoke1_start;
             }

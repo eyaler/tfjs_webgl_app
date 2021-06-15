@@ -6,14 +6,14 @@
         H E A D
   ------------------------------------------------------------------>
 <head>
-    <title>TensorFlow.js + WebGL Example</title>
+    <title>FaceSwap for Video</title>
     <meta charset="utf-8">
 
     <link rel="stylesheet" href="css/loading1.css" type="text/css">
 
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@2.4.0"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-backend-wasm@2.4.0/dist/tf-backend-wasm.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/face-landmarks-detection@0.0.1"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.7.0"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-backend-wasm@3.7.0/dist/tf-backend-wasm.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/face-landmarks-detection@0.0.3"></script>
 
     <script type="text/javascript" src="../third_party/stats.min.js"></script>
     <script type="text/javascript" src="../third_party/dat.gui.min.js"></script>
@@ -34,12 +34,14 @@
   ------------------------------------------------------------------>
 <body onload="startWebGL();">
 
-    <h1><label for="video">FaceSwap for Video:</label>
+    <h1>FaceSwap for Video
+    <label for="upload_video" style="font-size: 14pt;">upload video:</label>
     <input type="file"
-           id="video" name="video" value=""
+           id="upload_video" name="upload_video" value=""
            accept="video/*">
-    <button id="restart">restart</button>
-    <button id="camera">camera</button>
+    <button id="rewind">rewind</button>
+    <button id="record">record</button>
+    <button id="camera_btn">camera</button>
     </h1>
     <div id="loading">
       <div class="spinner"></div>
@@ -49,7 +51,14 @@
     <canvas id="glcanvas" width="1280" height="720"></canvas>
     </center>
 
-    <h1>↑<br>Drop a face image to change the face mask.</h1>
+
+    <h2>
+        <label for="upload_mask" style="font-size: 14pt;">upload image:</label>
+        <input type="file"
+           id="upload_mask" name="upload_mask" value=""
+           accept="image/*">
+    <button id="remove">remove</button>
+        <br><br>or drag and drop an image or video from computer or web to change the face mask or background video</h2>
 
     <div id="debug_log"></div>
 </body>

@@ -1,6 +1,14 @@
 # A fork of https://terryky.github.io/tfjs_webgl_app with some added FaceSwap sugar:
-1. option to upload local video + restart button
-2. respect PNG mask transparency
+1. option to switch beteen camera and video
+2. rewind button
+3. video with mask can be recorded
+4. respect PNG mask transparency
+5. allow white/black/green/blue background
+6. mask can be removed
+7. both image and video can be used via:
+   1. upload buttons
+   2. drag and drop file from computer
+   3. drag and drop file/HTMLelement/link from web (depenging on server CORS)
 
 # tfjs_webgl_app
 WebGL visualization apps using TensorFlow.js
