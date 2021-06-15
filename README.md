@@ -2,14 +2,16 @@
 ## https://j.mp/facemesh
 1. option to switch beteen camera and video
 2. rewind button
-3. video with mask can be recorded
+3. video with mask can be recorded*
 4. respect PNG mask transparency
 5. allow white/black/green/blue background
 6. mask can be removed
 7. both image and video can be used via:
    1. upload buttons
    2. drag and drop file from computer
-   3. drag and drop file/HTMLelement/link from web (depenging on server CORS)
+   3. drag and drop file/HTMLelement/link from web (depending on server CORS)
+
+(*) known issue: recording the video in firefox will kill audio output until a new video is loaded (https://bugzilla-dev.allizom.org/show_bug.cgi?id=1178751)
 
 # tfjs_webgl_app
 WebGL visualization apps using TensorFlow.js
