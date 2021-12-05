@@ -641,6 +641,7 @@ function startWebGL()
             if (facemesh_ready)
             {
                 current_phase = 2;
+                GLUtil.restart_video_texture(camvid_tex);
                 let time_invoke1_start = performance.now();
 
                 num_repeat = mask_updated ? 2 : 1;
