@@ -117,8 +117,28 @@ GLUtil.create_video_texture = function (gl, url, muted=false)
     video.crossOrigin = "anonymous";
 
     video.src = url;
-    video.addEventListener('playing',function(){console.log('video playing'); video_tex.ready = true;}, true);
-    video.addEventListener('ended',function(){console.log('video ended'); video_tex.ready = false;}, true);
+
+    // https://developer.mozilla.org/en-US/docs/Web/API/WebGL_API/Tutorial/Animating_textures_in_WebGL
+    // Waiting for these 2 events ensures
+    // there is data in the video
+
+    var playing = false;
+    var timeupdate = false;
+
+    video.addEventListener('playing', function() {
+       playing = true;
+       checkReady();
+    }, true);
+
+    video.addEventListener('timeupdate', function() {
+       timeupdate = true;
+       checkReady();
+    }, true);
+
+    function checkReady() {
+        ready = playing && timeupdate);
+    }
+
     video_tex.video = video;
     video.play();
     return video_tex;
