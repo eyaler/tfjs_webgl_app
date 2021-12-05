@@ -56,8 +56,7 @@ function init_stats ()
  *     +-+------+-+     +------+
  *                      +------+
  */
-function
-calc_size_to_fit (gl, src_w, src_h, win_w, win_h)
+function calc_size_to_fit (gl, src_w, src_h, win_w, win_h)
 {
     let win_aspect = win_w / win_h;
     let tex_aspect = src_w / src_h;
@@ -95,8 +94,7 @@ calc_size_to_fit (gl, src_w, src_h, win_w, win_h)
 }
 
 
-function 
-render_2d_scene (gl, texid, face_predictions, tex_w, tex_h,
+function render_2d_scene (gl, texid, face_predictions, tex_w, tex_h,
                  masktex, mask_predictions)
 {
     let color = [0.0, 1.0, 1.0, 0.5]
@@ -363,8 +361,7 @@ function startWebGL()
     };
 
     document.getElementById("rewind").onclick = function(e) {
-        if (!is_camera)
-        {GLUtil.restart_video_texture(camvid_tex);}
+        if (!is_camera) {GLUtil.restart_video_texture(camvid_tex);}
     }
 
     document.getElementById("record").onclick = function(e)
@@ -687,5 +684,5 @@ function startWebGL()
         stats.end();
         requestAnimationFrame (render);
     }
-    requestAnimationFrame (render);
+    render();
 }
