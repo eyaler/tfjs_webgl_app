@@ -385,31 +385,17 @@ function startWebGL()
             }
             var audio_track = recorder_video_stream.getAudioTracks()[0];
             recorder_canvas_stream.addTrack(audio_track);
-            mediaRecorder = new MediaRecorder(recorder_canvas_stream);
-            mediaRecorder.ondataavailable = function (event) {
-              if (event.data&&event.data.size > 0) {
-                recordedChunks.push(event.data);
-              }
-            }
-            camtex.video.pause();
-            camtex.video.loop = false;
-            GLUtil.restart_video_texture(camtex);
-            mediaRecorder.start();
-            camtex.video.play();
-            camtex.video.addEventListener('ended',mediaRecorder.stop(),false);
-            document.getElementById("record").style.backgroundColor = 'red';
-        }
-        else
-        {
+            mediaRecorder = new MediaRecorder(recorder_canvas_stream, {mimeType: 'video/mp4'});
             mediaRecorder.onstop = function() {
                 if (rec_camera) {recorder_video_stream.getTracks().forEach(track => track.stop());}
-                else {
-                    camtex.video.removeEventListener('ended',mediaRecorder.stop(),false);
-                    camtex.video.loop = true;
-                }
                 recorder_video_stream = '';
                 recorder_canvas_stream.getTracks().forEach(track => track.stop());
                 recorder_canvas_stream = '';
+                if (!rec_camera)
+                {
+                    camtex.video.loop = true;
+                    camtex.video.play();
+                }
                 var blob = new Blob(recordedChunks, {type: 'video/mp4'});
                 var url = URL.createObjectURL(blob);
                 console.log(url);
@@ -425,12 +411,27 @@ function startWebGL()
                 }, 100);
 
                 document.getElementById("record").style= '';
+                is_record = false;
             }
+
+            mediaRecorder.ondataavailable = function (event) {
+              if (event.data&&event.data.size > 0) {
+                recordedChunks.push(event.data);
+              }
+            }
+            camtex.video.pause();
+            camtex.video.loop = false;
+            GLUtil.restart_video_texture(camtex);
+            camtex.video.addEventListener('ended',mediaRecorder.stop(),{'once': true});
+            mediaRecorder.start();
+            camtex.video.play();
+            document.getElementById("record").style.backgroundColor = 'red';
+            is_record = true;
+        }
+        else
+        {
             mediaRecorder.stop();
         }
-        is_record = !is_record;
-
-
     }
 
     document.getElementById("camera_btn").onclick = function(e) {
