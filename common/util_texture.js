@@ -117,8 +117,8 @@ GLUtil.create_video_texture = function (gl, url, muted=false)
     video.crossOrigin = "anonymous";
 
     video.src = url;
-    video.addEventListener('playing',function(){video_tex.ready = true;}, true);
-    video.addEventListener('ended',function(){video_tex.ready = false;}, true);
+    video.addEventListener('playing',function(){console.log('video playing'); video_tex.ready = true;}, true);
+    video.addEventListener('ended',function(){console.log('video ended'); video_tex.ready = false;}, true);
     video_tex.video = video;
     video.play();
     return video_tex;
@@ -126,7 +126,7 @@ GLUtil.create_video_texture = function (gl, url, muted=false)
 
 GLUtil.restart_video_texture = function (video_tex)
 {
-    if (GLUtil.is_ready(video_tex)) {video_tex.video.currentTime = 0;}
+    if (GLUtil.is_camvid_ready(video_tex)) {video_tex.video.currentTime = 0;}
 }
 
 
@@ -145,16 +145,16 @@ GLUtil.stop_video = function (video_tex)
 
 
 // camera and video:
-GLUtil.is_ready = function (tex)
+GLUtil.is_camvid_ready = function (camvid_tex)
 {
-    return tex.ready;
+    return camvid_tex.ready;
 }
 
-GLUtil.get_resolution = function (tex)
+GLUtil.get_resolution = function (camvid_tex)
 {
     let width  = 0;
     let height = 0;
-    if (GLUtil.is_ready(tex))
+    if (GLUtil.is_camvid_ready(camvid_tex))
     {
         width  = tex.video.videoWidth;
         height = tex.video.videoHeight;
@@ -165,12 +165,12 @@ GLUtil.get_resolution = function (tex)
     };
 }
 
-GLUtil.update_texture = function (gl, tex)
+GLUtil.update_camvid_texture = function (gl, camvid_tex)
 {
-    if (GLUtil.is_ready(tex))
+    if (GLUtil.is_camvid_ready(camvid_tex))
     {
-        gl.bindTexture(gl.TEXTURE_2D, tex.texid);
-        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, tex.video);
+        gl.bindTexture(gl.TEXTURE_2D, camvid_tex.texid);
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, camvid_tex.video);
     }
 }
 
