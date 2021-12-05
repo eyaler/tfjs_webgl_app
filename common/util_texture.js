@@ -136,7 +136,7 @@ GLUtil.create_video_texture = function (gl, url, muted=false)
     }, true);
 
     function checkReady() {
-        ready = video_tex.playing && video_tex.timeupdate;
+        video_tex.ready = video_tex.playing && video_tex.timeupdate;
     }
 
     video_tex.video = video;
