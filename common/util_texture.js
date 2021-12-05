@@ -107,7 +107,6 @@ GLUtil.is_image_texture_ready = function (image_tex)
 GLUtil.create_video_texture = function (gl, url, muted=false)
 {
     let video_tex = {};
-    video_tex.ready = false;
     video_tex.texid = GLUtil.create_texture (gl);
 
     let video = document.createElement('video');
@@ -116,25 +115,28 @@ GLUtil.create_video_texture = function (gl, url, muted=false)
     video.loop     = true;
     video.crossOrigin = "anonymous";
 
-    video.addEventListener('playing',    function(){video_tex.ready    = true;}, true);
-    video.addEventListener('ended',     function(){video_tex.ready    = false;}, true);
-
     video.src = url;
-    video.play();
+    function on_video_loaded()
+        {
+            video_tex.ready = true;
+        }
+
+    video.onloadedmetadata = on_camera_metadata_loaded;
     video_tex.video = video;
+    video.play();
     return video_tex;
 }
 
 GLUtil.restart_video_texture = function (video_tex)
 {
-    if (video_tex.ready) {video_tex.video.currentTime = 0;}
+    if (GLUtil.is_video_ready(video_tex)) {video_tex.video.currentTime = 0;}
 }
 
 GLUtil.get_video_resolution = function (video_tex)
 {
     let width  = 0;
     let height = 0;
-    if (video_tex.ready)
+    if (GLUtil.is_video_ready(video_tex))
     {
         width  = video_tex.video.videoWidth;
         height = video_tex.video.videoHeight;
@@ -147,15 +149,29 @@ GLUtil.get_video_resolution = function (video_tex)
 
 GLUtil.is_video_ready = function (video_tex)
 {
+    return video_tex.video.playing &&
     return video_tex.ready;
 }
 
 GLUtil.update_video_texture = function (gl, video_tex)
 {
-    if (video_tex.ready)
+    if (GLUtil.is_video_ready(video_tex))
     {
         gl.bindTexture(gl.TEXTURE_2D, video_tex.texid);
         gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, video_tex.video);
+    }
+}
+
+GLUtil.stop_video = function (video_tex)
+{
+    try
+    {
+        video_tex.video.pause();
+        video_tex.video.src='';
+        video_tex.ready = false;
+    }
+    catch(e){
+        //console.log(e);
     }
 }
 
@@ -248,21 +264,11 @@ GLUtil.stop_camera = function (camera_tex)
     try
     {
         camera_tex.video.srcObject.getTracks().forEach(track => track.stop());
-        video_tex.video.srcObject='';
+        camera_tex.video.srcObject='';
+        camera_tex.ready = false;
     }
     catch(e){
         //console.log(e);
     }
 }
 
-GLUtil.stop_video = function (video_tex)
-{
-    try
-    {
-        video_tex.video.pause();
-        video_tex.video.src='';
-    }
-    catch(e){
-        //console.log(e);
-    }
-}
