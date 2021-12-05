@@ -258,8 +258,7 @@ function check_resize_canvas (gl, canvas)
 }
 
 
-function
-init_gui ()
+function init_gui ()
 {
     const gui = new dat.GUI();
 
@@ -622,9 +621,9 @@ function startWebGL()
             gl.scissor  (0, 0, win_w, win_h);
         }
 
-        if (GLUtil.is_camera_ready(camtex))
+        if (GLUtil.is_ready(camtex))
         {
-            GLUtil.update_camera_texture (gl, camtex);
+            GLUtil.update_texture (gl, camtex);
             src_w = camtex.video.videoWidth;
             src_h = camtex.video.videoHeight;
             texid = camtex.texid;
@@ -647,7 +646,7 @@ function startWebGL()
                 num_repeat = mask_updated ? 2 : 1;
                 for (let i = 0; i < num_repeat; i ++) /* repeat 5 times to flush pipeline ? */
                 {
-                    if (GLUtil.is_camera_ready(camtex))
+                    if (GLUtil.is_ready(camtex))
                         try {
                             face_predictions = await facemesh_model.estimateFaces ({input: camtex.video});
                         }

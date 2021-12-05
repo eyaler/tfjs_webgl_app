@@ -116,12 +116,7 @@ GLUtil.create_video_texture = function (gl, url, muted=false)
     video.crossOrigin = "anonymous";
 
     video.src = url;
-    function on_video_loaded()
-        {
-            video_tex.ready = true;
-        }
-
-    video.onloadedmetadata = on_camera_metadata_loaded;
+    video.onplaying = function(){video_tex.ready = true;}
     video_tex.video = video;
     video.play();
     return video_tex;
@@ -129,37 +124,9 @@ GLUtil.create_video_texture = function (gl, url, muted=false)
 
 GLUtil.restart_video_texture = function (video_tex)
 {
-    if (GLUtil.is_video_ready(video_tex)) {video_tex.video.currentTime = 0;}
+    if (GLUtil.is_ready(video_tex)) {video_tex.video.currentTime = 0;}
 }
 
-GLUtil.get_video_resolution = function (video_tex)
-{
-    let width  = 0;
-    let height = 0;
-    if (GLUtil.is_video_ready(video_tex))
-    {
-        width  = video_tex.video.videoWidth;
-        height = video_tex.video.videoHeight;
-    }
-    return {
-        w: width,
-        h: height,
-    };
-}
-
-GLUtil.is_video_ready = function (video_tex)
-{
-    return video_tex.ready;
-}
-
-GLUtil.update_video_texture = function (gl, video_tex)
-{
-    if (GLUtil.is_video_ready(video_tex))
-    {
-        gl.bindTexture(gl.TEXTURE_2D, video_tex.texid);
-        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, video_tex.video);
-    }
-}
 
 GLUtil.stop_video = function (video_tex)
 {
@@ -174,6 +141,36 @@ GLUtil.stop_video = function (video_tex)
     }
 }
 
+
+// camera and video:
+GLUtil.is_ready = function (tex)
+{
+    return tex.ready;
+}
+
+GLUtil.get_resolution = function (tex)
+{
+    let width  = 0;
+    let height = 0;
+    if (GLUtil.is_ready(tex))
+    {
+        width  = tex.video.videoWidth;
+        height = tex.video.videoHeight;
+    }
+    return {
+        w: width,
+        h: height,
+    };
+}
+
+GLUtil.update_camera_texture = function (gl, tex)
+{
+    if (GLUtil.is_ready(tex))
+    {
+        gl.bindTexture(gl.TEXTURE_2D, tex.texid);
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, tex.video);
+    }
+}
 
 /* ---------------------------------------------------------------- *
  *  Create Web Camera Texture
@@ -200,11 +197,7 @@ GLUtil.create_camera_texture = function (gl)
 
     function on_camera_ready (stream)
     {
-        function on_camera_metadata_loaded()
-        {
-            camera_tex.ready = true;
-        }
-        video.onloadedmetadata = on_camera_metadata_loaded;
+        video.onloadedmetadata = (event) => {camera_tex.ready = true;};
         video.srcObject        = stream;
         video.play();
     }
@@ -229,34 +222,6 @@ GLUtil.create_camera_texture = function (gl)
     return camera_tex;
 }
 
-GLUtil.get_camera_resolution = function (camera_tex)
-{
-    let width  = 0;
-    let height = 0;
-    if (camera_tex.ready)
-    {
-        width  = camera_tex.video.videoWidth;
-        height = camera_tex.video.videoHeight;
-    }
-    return {
-        w: width,
-        h: height,
-    };
-}
-
-GLUtil.is_camera_ready = function (camera_tex)
-{
-    return camera_tex.ready;
-}
-
-GLUtil.update_camera_texture = function (gl, camera_tex)
-{
-    if (camera_tex.ready)
-    {
-        gl.bindTexture(gl.TEXTURE_2D, camera_tex.texid);
-        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, camera_tex.video);
-    }
-}
 
 GLUtil.stop_camera = function (camera_tex)
 {
