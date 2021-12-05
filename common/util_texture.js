@@ -130,7 +130,7 @@ GLUtil.create_video_texture = function (gl, url, muted=false)
     video.addEventListener('waiting', function(){video_tex.playing    = false; video_tex.timeupdate = false; checkReady();}, true);
     video.addEventListener('stalled', function(){video_tex.playing    = false; video_tex.timeupdate = false; checkReady();}, true);
     video.addEventListener('suspend', function(){video_tex.playing    = false; video_tex.timeupdate = false; checkReady();}, true);
-    video.addEventListener('ended', function(){video_tex.playing    = false; video_tex.timeupdate = false; checkReady();}, true);
+    video.addEventListener('ended', function(){console.log('ended'); video_tex.playing    = false; video_tex.timeupdate = false; checkReady();}, true);
 
     video.play();
     video.src = url;
