@@ -363,7 +363,8 @@ function startWebGL()
     };
 
     document.getElementById("rewind").onclick = function(e) {
-        GLUtil.restart_video_texture(camvid_tex);
+        if (!is_camera)
+        {GLUtil.restart_video_texture(camvid_tex);}
     }
 
     document.getElementById("record").onclick = function(e)
@@ -640,8 +641,8 @@ function startWebGL()
 
             if (facemesh_ready)
             {
+                if (!is_camera&&current_phase<2) {GLUtil.restart_video_texture(camvid_tex);}
                 current_phase = 2;
-                GLUtil.restart_video_texture(camvid_tex);
                 let time_invoke1_start = performance.now();
 
                 num_repeat = mask_updated ? 2 : 1;
