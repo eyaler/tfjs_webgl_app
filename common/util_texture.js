@@ -149,7 +149,6 @@ GLUtil.get_video_resolution = function (video_tex)
 
 GLUtil.is_video_ready = function (video_tex)
 {
-    return video_tex.video.playing &&
     return video_tex.ready;
 }
 

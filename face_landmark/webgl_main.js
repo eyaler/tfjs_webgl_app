@@ -396,13 +396,13 @@ function startWebGL()
                     camtex.video.loop = true;
                     camtex.video.play();
                 }
-                var blob = new Blob(recordedChunks, {type: 'video/mp4'});
+                var blob = new Blob(recordedChunks);
                 var url = URL.createObjectURL(blob);
                 console.log(url);
                 var a = document.createElement('a');
                 a.style = 'display: none';
                 a.href = url;
-                a.download = 'faceswap.mp4';
+                a.download = 'faceswap';
                 document.body.appendChild(a);
                 a.click();
                 setTimeout(() => {
