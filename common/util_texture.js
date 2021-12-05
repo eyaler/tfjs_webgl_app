@@ -115,22 +115,22 @@ GLUtil.create_video_texture = function (gl, url, muted=false)
     video.muted    = muted;
     video.loop     = true;
     video.crossOrigin = "anonymous";
-    let playing    = false;
-    let timeupdate = false;
+    video_tex.playing    = false;
+    video_tex.timeupdate = false;
 
     // Waiting for these 2 events ensures there is data in the video
     function checkReady()
     {
-        console.log('checkReady: playing='+playing+' timeupdate='+timeupdate)
-        video_tex.ready = playing && timeupdate;
+        console.log('checkReady: playing='+video_tex.playing+' timeupdate='+video_tex.timeupdate)
+        video_tex.ready = video_tex.playing && video_tex.timeupdate;
     }
 
-    video.addEventListener('playing',    function(){playing    = true; checkReady();}, true);
-    video.addEventListener('timeupdate', function(){timeupdate = true; checkReady();}, true);
-    video.addEventListener('waiting', function(){playing    = false; timeupdate = false; checkReady();}, true);
-    video.addEventListener('stalled', function(){playing    = false; timeupdate = false; checkReady();}, true);
-    video.addEventListener('suspend', function(){playing    = false; timeupdate = false; checkReady();}, true);
-    video.addEventListener('ended', function(){playing    = false; timeupdate = false; checkReady();}, true);
+    video.addEventListener('playing',    function(){video_tex.playing    = true; checkReady();}, true);
+    video.addEventListener('timeupdate', function(){video_tex.timeupdate = true; checkReady();}, true);
+    video.addEventListener('waiting', function(){video_tex.playing    = false; video_tex.timeupdate = false; checkReady();}, true);
+    video.addEventListener('stalled', function(){video_tex.playing    = false; video_tex.timeupdate = false; checkReady();}, true);
+    video.addEventListener('suspend', function(){video_tex.playing    = false; video_tex.timeupdate = false; checkReady();}, true);
+    video.addEventListener('ended', function(){video_tex.playing    = false; video_tex.timeupdate = false; checkReady();}, true);
 
     video.onload = function ()
     {
