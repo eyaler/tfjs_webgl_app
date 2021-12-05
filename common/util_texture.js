@@ -165,7 +165,7 @@ GLUtil.get_resolution = function (tex)
     };
 }
 
-GLUtil.update_camera_texture = function (gl, tex)
+GLUtil.update_texture = function (gl, tex)
 {
     if (GLUtil.is_ready(tex))
     {
