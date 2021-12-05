@@ -106,7 +106,7 @@ GLUtil.is_image_texture_ready = function (image_tex)
  * ---------------------------------------------------------------- */
 GLUtil.create_video_texture = function (gl, url, muted=false)
 {
-    video_tex = {};
+    let video_tex = {};
     video_tex.ready = false;
     video_tex.texid = GLUtil.create_texture (gl);
 
@@ -132,10 +132,7 @@ GLUtil.create_video_texture = function (gl, url, muted=false)
     video.addEventListener('suspend', function(){video_tex.playing    = false; video_tex.timeupdate = false; checkReady();}, true);
     video.addEventListener('ended', function(){video_tex.playing    = false; video_tex.timeupdate = false; checkReady();}, true);
 
-    video.onload = function ()
-    {
-        video.play();
-    }
+    video.play();
     video.src = url;
 
     video_tex.video = video;

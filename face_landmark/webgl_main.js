@@ -392,6 +392,7 @@ function startWebGL()
               }
             }
             GLUtil.restart_video_texture(camtex);
+            camtex.video.addEventListener('ended',mediaRecorder.stop(),false);
             mediaRecorder.start();
             document.getElementById("record").style.backgroundColor = 'red';
         }
@@ -399,6 +400,7 @@ function startWebGL()
         {
             mediaRecorder.onstop = function() {
                 if (rec_camera) {recorder_video_stream.getTracks().forEach(track => track.stop());}
+                camtex.video.removeEventListener('ended',mediaRecorder.stop(),false);
                 recorder_video_stream = '';
                 recorder_canvas_stream.getTracks().forEach(track => track.stop());
                 recorder_canvas_stream = '';
