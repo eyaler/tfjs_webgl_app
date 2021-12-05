@@ -121,6 +121,7 @@ GLUtil.create_video_texture = function (gl, url, muted=false)
     // Waiting for these 2 events ensures there is data in the video
     function checkReady()
     {
+        console.log('checkReady: playing='+playing+' timeupdate='+timeupdate)
         video_tex.ready = playing && timeupdate;
     }
 
