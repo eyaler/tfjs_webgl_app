@@ -670,5 +670,5 @@ function startWebGL()
         stats.end();
         requestAnimationFrame (render);
     }
-    render ();
+    requestAnimationFrame (render);
 }
