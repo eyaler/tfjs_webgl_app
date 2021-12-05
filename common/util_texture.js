@@ -122,21 +122,21 @@ GLUtil.create_video_texture = function (gl, url, muted=false)
     // Waiting for these 2 events ensures
     // there is data in the video
 
-    var playing = false;
-    var timeupdate = false;
+    video_tex.playing = false;
+    video_tex.timeupdate = false;
 
     video.addEventListener('playing', function() {
-       playing = true;
+       video_tex.playing = true;
        checkReady();
     }, true);
 
     video.addEventListener('timeupdate', function() {
-       timeupdate = true;
+       video_tex.timeupdate = true;
        checkReady();
     }, true);
 
     function checkReady() {
-        ready = playing && timeupdate);
+        ready = video_tex.playing && video_tex.timeupdate;
     }
 
     video_tex.video = video;
