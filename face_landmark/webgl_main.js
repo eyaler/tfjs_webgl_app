@@ -385,7 +385,7 @@ function startWebGL()
             }
             var audio_track = recorder_video_stream.getAudioTracks()[0];
             recorder_canvas_stream.addTrack(audio_track);
-            mediaRecorder = new MediaRecorder(recorder_canvas_stream, {mimeType: 'video/mp4'});
+            mediaRecorder = new MediaRecorder(recorder_canvas_stream);
             mediaRecorder.onstop = function() {
                 if (rec_camera) {recorder_video_stream.getTracks().forEach(track => track.stop());}
                 recorder_video_stream = '';
