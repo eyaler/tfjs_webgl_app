@@ -391,9 +391,11 @@ function startWebGL()
                 recordedChunks.push(event.data);
               }
             }
+            camtex.video.pause()
             GLUtil.restart_video_texture(camtex);
-            camtex.video.addEventListener('ended',mediaRecorder.stop(),false);
+            //camtex.video.addEventListener('ended',mediaRecorder.stop(),false);
             mediaRecorder.start();
+            camtex.video.play()
             document.getElementById("record").style.backgroundColor = 'red';
         }
         else
