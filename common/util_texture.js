@@ -115,23 +115,9 @@ GLUtil.create_video_texture = function (gl, url, muted=false)
     video.muted    = muted;
     video.loop     = true;
     video.crossOrigin = "anonymous";
-    video_tex.playing    = false;
-    video_tex.timeupdate = false;
 
-    // Waiting for these 2 events ensures there is data in the video
-    function checkReady()
-    {
-        //console.log('checkReady: playing='+video_tex.playing+' timeupdate='+video_tex.timeupdate)
-        video_tex.ready = video_tex.playing && video_tex.timeupdate;
-    }
-
-    video.addEventListener('playing',    function(){console.log('playing'); video_tex.playing    = true; checkReady();}, true);
-    video.addEventListener('timeupdate', function(){console.log('timeupdate'); video_tex.timeupdate = true; checkReady();}, true);
-    video.addEventListener('waiting', function(){console.log('waiting'); video_tex.playing    = false; video_tex.timeupdate = false; checkReady();}, true);
-    video.addEventListener('stalled', function(){console.log('stalled'); video_tex.playing    = false; video_tex.timeupdate = false; checkReady();}, true);
-    video.addEventListener('suspend', function(){console.log('suspend'); video_tex.playing    = false; video_tex.timeupdate = false; checkReady();}, true);
-    video.addEventListener('ended', function(){console.log('ended'); video_tex.playing    = false; video_tex.timeupdate = false; checkReady();}, true);
-
+    video.addEventListener('playing',    function(){video_tex.ready    = true;}, true);
+    video.addEventListener('ended',     function(){video_tex.ready    = false;}, true);
 
     video.src = url;
     video.play();

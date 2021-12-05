@@ -391,18 +391,22 @@ function startWebGL()
                 recordedChunks.push(event.data);
               }
             }
-            camtex.video.pause()
+            camtex.video.pause();
+            camtex.video.loop = false;
             GLUtil.restart_video_texture(camtex);
-            //camtex.video.addEventListener('ended',mediaRecorder.stop(),false);
             mediaRecorder.start();
-            camtex.video.play()
+            camtex.video.play();
+            camtex.video.addEventListener('ended',mediaRecorder.stop(),false);
             document.getElementById("record").style.backgroundColor = 'red';
         }
         else
         {
             mediaRecorder.onstop = function() {
                 if (rec_camera) {recorder_video_stream.getTracks().forEach(track => track.stop());}
-                camtex.video.removeEventListener('ended',mediaRecorder.stop(),false);
+                else {
+                    camtex.video.removeEventListener('ended',mediaRecorder.stop(),false);
+                    camtex.video.loop = true;
+                }
                 recorder_video_stream = '';
                 recorder_canvas_stream.getTracks().forEach(track => track.stop());
                 recorder_canvas_stream = '';
