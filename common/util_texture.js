@@ -106,11 +106,11 @@ GLUtil.is_image_texture_ready = function (image_tex)
  * ---------------------------------------------------------------- */
 GLUtil.create_video_texture = function (gl, url, muted=false)
 {
-    let video_tex = {};
+    video_tex = {};
     video_tex.ready = false;
     video_tex.texid = GLUtil.create_texture (gl);
 
-    video = document.createElement('video');
+    let video = document.createElement('video');
     video.autoplay = true;
     video.muted    = muted;
     video.loop     = true;
@@ -186,7 +186,7 @@ GLUtil.create_camera_texture = function (gl)
     camera_tex.ready = false;
     camera_tex.texid = GLUtil.create_texture (gl);
 
-    video = document.createElement('video');
+    let video = document.createElement('video');
     video.autoplay = true;
     video.loop     = true;
     video.muted    = true;
