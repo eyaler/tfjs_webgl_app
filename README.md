@@ -1,17 +1,19 @@
 # A fork of https://terryky.github.io/tfjs_webgl_app with some added FaceSwap sugar for videos:
 ## https://j.mp/facemesh
-1. option to switch beteen camera and video
-2. rewind button
-3. video with mask can be recorded*
+1. option to switch between camera and video
+2. video rewind button
+3. output can be recorded* (video input will be recorded from beginning to end)
 4. respect PNG mask transparency
 5. allow white/black/green/blue background
 6. mask can be removed
-7. both image and video can be used via:
+7. both image masks and videos can be applied via:
    1. upload buttons
    2. drag and drop file from computer
    3. drag and drop file/HTMLelement/link from web (depending on server CORS)
 
-(*) known issue: recording the video in firefox will kill audio output until a new video is loaded (https://bugzilla-dev.allizom.org/show_bug.cgi?id=1178751)
+known issues:
+1. recording the video in firefox will kill audio output until a new video is loaded (https://bugzilla-dev.allizom.org/show_bug.cgi?id=1178751)
+2. video playback is badly disrupted in recent versions of Firefox (https://github.com/tensorflow/tfjs/issues/5947)
 
 # tfjs_webgl_app
 WebGL visualization apps using TensorFlow.js

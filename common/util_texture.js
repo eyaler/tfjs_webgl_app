@@ -109,38 +109,38 @@ GLUtil.create_video_texture = function (gl, url, muted=false)
     let video_tex = {};
     video_tex.ready = false;
     video_tex.texid = GLUtil.create_texture (gl);
-
     let video = document.createElement('video');
     video.autoplay = true;
     video.muted    = muted;
     video.loop     = true;
     video.crossOrigin = "anonymous";
 
-    video.src = url;
-
     // https://developer.mozilla.org/en-US/docs/Web/API/WebGL_API/Tutorial/Animating_textures_in_WebGL
     // Waiting for these 2 events ensures
     // there is data in the video
 
-    video_tex.playing = false;
-    video_tex.timeupdate = false;
+    let playing = false;
+    let timeupdate = false;
 
     video.addEventListener('playing', function() {
-       video_tex.playing = true;
+       playing = true;
        checkReady();
     }, true);
 
-    video.addEventListener('timeupdate', function() {
-       video_tex.timeupdate = true;
+    video.addEventListener('timeupdate', function(e) {
+       timeupdate = true;
        checkReady();
     }, true);
+
+    video.src = url;
+    video.play();
 
     function checkReady() {
-        video_tex.ready = video_tex.playing && video_tex.timeupdate;
+        if (playing && timeupdate)
+            {video_tex.ready = true;}
     }
 
     video_tex.video = video;
-    video.play();
     return video_tex;
 }
 
@@ -170,20 +170,6 @@ GLUtil.is_camvid_ready = function (camvid_tex)
     return camvid_tex.ready;
 }
 
-GLUtil.get_resolution = function (camvid_tex)
-{
-    let width  = 0;
-    let height = 0;
-    if (GLUtil.is_camvid_ready(camvid_tex))
-    {
-        width  = tex.video.videoWidth;
-        height = tex.video.videoHeight;
-    }
-    return {
-        w: width,
-        h: height,
-    };
-}
 
 GLUtil.update_camvid_texture = function (gl, camvid_tex)
 {

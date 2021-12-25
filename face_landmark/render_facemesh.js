@@ -181,7 +181,7 @@ draw_facemesh_tri_tex (gl, texid, vtx, uv, color, drill_eye_hole, flip_h)
 
 /*
  *  Vertex indices are from:
- *      https://github.com/tensorflow/tfjs-models/blob/master/facemesh/src/keypoints.ts
+ *      https://github.com/tensorflow/tfjs-models/blob/master/face-landmarks-detection/src/mediapipe-facemesh/keypoints.ts
  */
 render.s_face_tris = [
     127, 34, 139, 11, 0, 37, 232, 231, 120, 72, 37, 39, 128, 121, 47, 232, 121,

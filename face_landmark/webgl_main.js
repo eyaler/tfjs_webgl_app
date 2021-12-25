@@ -128,9 +128,9 @@ function render_2d_scene (gl, texid, face_predictions, tex_w, tex_h,
 
     if (!masktex) {return;}
 
-    for (let i = 0; i < face_predictions.length; i++)
+    for (let j = 0; j < face_predictions.length; j++)
     {
-        const keypoints = face_predictions[i].scaledMesh;
+        const keypoints = face_predictions[j].scaledMesh;
 
         /* render the deformed mask image onto the camera image */
         if (mask_predictions.length > 0)
@@ -643,14 +643,14 @@ function startWebGL()
                 let time_invoke1_start = performance.now();
 
                 num_repeat = mask_updated ? 2 : 1;
-                for (let i = 0; i < num_repeat; i ++) /* repeat 5 times to flush pipeline ? */
+                for (let i = 0; i < num_repeat; i++) /* repeat 5 times to flush pipeline ? */
                 {
                     if (GLUtil.is_camvid_ready(camvid_tex))
                         try {
                             face_predictions = await facemesh_model.estimateFaces ({input: camvid_tex.video});
                         }
                         catch(e){
-                        //console.log(e);
+                            //console.log(e);
                         }
                 }
                 time_invoke0 = performance.now() - time_invoke1_start;
@@ -684,5 +684,5 @@ function startWebGL()
         stats.end();
         requestAnimationFrame (render);
     }
-    render();
+    requestAnimationFrame (render);
 }
